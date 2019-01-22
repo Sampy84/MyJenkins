@@ -1,12 +1,16 @@
 pipeline {
 
     agent any
-
+	
+    tools {
+        gradle 'gradle-4.6'
+    }
+	
     stages {
         stage('Build') {
             steps {
                 echo 'Building...'
-				sh "./gradle -b ./build.gradle pmdMain --info"
+				sh "gradle -b ./build.gradle pmdMain --info"
             }
         }
         stage('Test') {
