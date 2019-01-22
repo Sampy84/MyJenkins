@@ -6,6 +6,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building...'
+				sh "gradle -b ./build.gradle pmdMain --info"
             }
         }
         stage('Test') {
