@@ -6,7 +6,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building...'
-				sh "C:/ProgramData/chocolatey/bin/gradle.exe -b ./build.gradle clean pmdMain --info"
+				sh "C:/ProgramData/chocolatey/bin/gradle.exe -b ./build.gradle clean build"
             }
         }
         stage('Test') {
