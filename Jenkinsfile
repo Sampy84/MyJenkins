@@ -6,7 +6,7 @@ pipeline {
         stage('Build') {
             steps {
                 echo 'Building...'
-				sh "C:\ProgramData\chocolatey\bin\gradle.exe --version"
+				sh "C:/ProgramData/chocolatey/bin/gradle.exe --version"
             }
         }
         stage('Test') {
