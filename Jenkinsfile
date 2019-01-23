@@ -7,6 +7,7 @@ pipeline {
             steps {
                 echo 'Building...'
 				sh "C:/ProgramData/chocolatey/bin/gradle.exe -b ./build.gradle clean build"
+				sh "C:/ProgramData/chocolatey/bin/gradle.exe -b ./build.gradle cpdCheck --info"
             }
         }
         stage('Test') {
