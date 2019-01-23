@@ -73,7 +73,8 @@ pmd {
 pmdMain {
     reports {
         xml.enabled true
-        html.enabled false
+        html.enabled true
         xml.destination file("${buildDir}/reports/pmd/pmd.xml")
+		html.destination file("${buildDir}/reports/pmd/pmd.html")
     }
 }
