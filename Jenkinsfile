@@ -1,23 +1,38 @@
 pipeline {
 
     agent any
+	// agent { label 'slave' }
 
+    tools {
+        ...
+        gradle 'gradle-4.6'
+        ...
+    }
+    ...
+	
     stages {
-        stage('Build') {
+        stage('cpd - Duplicated Code Analysis') {
             steps {
-                echo 'Building...'
+                sh "gradle -b <gradle config path>/build.gradle cpdCheck --info"
             }
         }
-        stage('Test') {
+        stage('pmd - Style Analysis') {
             steps {
-                echo 'Testing...'
+                sh "gradle -b <gradle config path>/build.gradle pmdMain --info"
             }
         }
-        stage('Deploy') {
+        stage('findbugs - Bugs Analysis') {
             steps {
-                echo 'Deploying...'
+                sh "gradle -b <gradle config path>/build.gradle findbugsMain --info"
             }
         }
+        stage('jacoco - Code Coverage Analysis') {
+            steps {
+                sh "gradle -b <gradle config path>/build.gradle clean stagetest test jacocoTestReport --info"
+            }
+        }
+        ...
+
 		stage('Retrying') {
 			steps {
 				retry(3) {
@@ -38,16 +53,22 @@ pipeline {
 	
     post {
         always {
-            echo 'This will always run'
-			//recordIssues enabledForFailure: true, tool: java(pattern: '*.xml'), filters: [includeFile('MyFile.*.java'), excludeCategory('WHITESPACE')]
-																				// filters: Chido di visualizzare gli errori solo per i files indicati tramite filtri
-			recordIssues enabledForFailure: true, tool: mavenConsole()
-			recordIssues enabledForFailure: true, tool: java()
-			recordIssues enabledForFailure: true, tool: javaDoc()
-			recordIssues enabledForFailure: true, tool: checkStyle()
-			recordIssues enabledForFailure: true, tool: spotBugs()
-			recordIssues enabledForFailure: true, tool: cpd()
-			recordIssues enabledForFailure: true, tool: pmd()
+            recordIssues enabledForFailure: true,
+                tools: [
+                    pmdParser(canComputeNew: false, pattern: '<reports path>/pmd/pmd.xml'),
+                    spotBugs(canComputeNew: false, isRankActivated: true, pattern: '<reports path>/findbugs/findbugs.xml'),
+                    cpd(canComputeNew: false, pattern: '<reports path>/cpd/cpd.xml')
+                    ]
+                jacoco(
+                    execPattern: '<microservice path>/build/jacoco/test.exec',
+                    classPattern: '<microservice path>/build/classes/',
+                    exclusionPattern: '<microservice path>/**/test/',
+                    sourcePattern: '<microservice path>/src/main/'
+                )
+                archive '<microservice path>/build/jacoco/**/*.xml'
+                publishHTML(
+                    [allowMissing: false, alwaysLinkToLastBuild: false, keepAll: true, reportDir: '<microservice path>/build/reports/tests/test/', reportFiles: 'index.html', reportName:'Test Report', reportTitles: ''])
+                    junit '<microservice path>/build/test-results/**/*.xml'
         }
         success {
             echo 'This will run only if successful'
